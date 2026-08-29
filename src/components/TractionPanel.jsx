@@ -20,6 +20,10 @@ export default function TractionPanel({ variant = "default" }) {
     signals.length > 0
       ? Math.round((wins / signals.length) * 100)
       : null;
+  const totalPnl = signals.reduce((sum, s) => sum + (s.pnl || 0), 0);
+  const pnlDisplay = signals.length > 0
+    ? `${totalPnl >= 0 ? "+" : ""}${(totalPnl * 100).toFixed(1)}%`
+    : "—";
 
   /* =========================================================
      COMPACT MODE (DASHBOARD USE)
@@ -34,7 +38,7 @@ export default function TractionPanel({ variant = "default" }) {
           value={winRate !== null ? `${winRate}%` : "—"}
         />
         <Metric label="Avg PnL" value="+0.42" highlight />
-        <div className="h-10 rounded-lg bg-white/5" />
+        <Metric label="Session PnL" value={pnlDisplay} highlight={totalPnl >= 0} />
       </div>
     );
   }

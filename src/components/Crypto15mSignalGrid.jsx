@@ -5,7 +5,7 @@ import ConfidenceExplanation from "./ConfidenceExplanation";
 const ASSETS = ["BTC", "ETH", "SOL", "XRP"];
 
 function formatTime(ms) {
-  if (ms <= 0) return "0:00";
+  if (!ms || isNaN(ms) || ms <= 0) return "0:00";
   const m = Math.floor(ms / 60000);
   const s = Math.floor((ms % 60000) / 1000);
   return `${m}:${s.toString().padStart(2, "0")}`;
@@ -38,9 +38,9 @@ export default function Crypto15mSignalGrid() {
         const s = signals[asset];
         if (!s) return null;
 
-        const remaining = s.resolveAt - Date.now();
-        const confidencePct = Math.round(s.confidence * 100);
-        const isUrgent = remaining < 5 * 60 * 1000;
+        const remaining = (s.resolveAt && !isNaN(s.resolveAt)) ? s.resolveAt - Date.now() : 0;
+        const confidencePct = Math.round((s.confidence ?? 0) * 100);
+        const isUrgent = remaining > 0 && remaining < 5 * 60 * 1000;
 
         return (
           <div
@@ -60,13 +60,15 @@ export default function Crypto15mSignalGrid() {
                   {asset} · 15m
                 </div>
 
-                <div
-                  className={`text-sm font-semibold flex items-center gap-1 ${
-                    isUrgent ? "fire" : "text-red-400"
-                  }`}
-                >
-                  🔥 Resolve in {formatTime(remaining)}
-                </div>
+                {remaining > 0 && (
+                  <div
+                    className={`text-sm font-semibold flex items-center gap-1 ${
+                      isUrgent ? "fire text-red-400" : "text-white/50"
+                    }`}
+                  >
+                    {isUrgent ? "🔥" : "⏱"} Resolve in {formatTime(remaining)}
+                  </div>
+                )}
               </div>
 
               <div className="text-right">
